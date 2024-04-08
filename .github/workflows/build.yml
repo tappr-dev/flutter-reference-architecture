@@ -1,0 +1,45 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request_target:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'adopt-openj9'
+          java-version: '11'
+          cache: 'gradle'
+
+      - name: Flutter action
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Lint
+        run: |
+          dart format --set-exit-if-changed .
+          flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Build
+        run: |
+          flutter build appbundle --debug
+          flutter build ios --debug --no-codesign
+          flutter build web

@@ -1,0 +1,28 @@
+name: Deploy API backend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: smfejswfkqnkqteaofes
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Deploy
+        run: |
+          supabase link --project-ref ${{ env.SUPABASE_PROJECT_REF }} --password ${{ env.SUPABASE_DB_PASSWORD }}
+          supabase db push
+          supabase functions deploy
